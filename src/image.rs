@@ -1,7 +1,5 @@
 use std::{fs::File, io::BufWriter};
 
-extern crate png;
-
 pub fn create_image(name: &str, width: u32, height: u32, data: &[u8]) {
     let image = File::create(name).unwrap();
     let ref mut w = BufWriter::new(image);
