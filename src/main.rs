@@ -18,20 +18,46 @@ fn write_color(c: &color, data: &mut Vec<u8>) {
     }
 }
 
+fn hit_sphere(center: point3, radius: f64, r: &ray) -> f64 {
+    let oc = r.origin() - center;
+    let a = r.direction().length_squared();
+    let half_b = vec3::dot(oc, r.direction());
+    let c = oc.length_squared() - radius*radius;
+    let discriminant = half_b * half_b - a*c;
+
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-half_b - discriminant.sqrt()) / a
+    }
+}
+
 fn ray_color(r: &ray) -> color {
-    color::from_scalar(0.0)
+    let center = point3::new(0.0, 0.0, -1.0);
+    let radius = 0.5;
+    let t = hit_sphere(center, radius, r);
+    if t > 0.0 {
+        let n = (r.at(t) - center).normalized();
+        color::new(n.x()+1.0, n.y()+1.0, n.z()+1.0) * 0.5
+    } else {
+        let unit_direction = r.direction().normalized();
+        let a = 0.5 * (unit_direction.y() + 1.0);
+        let start_color = color::new(0.5, 0.7, 1.0);
+        let end_color = color::new(1.0, 1.0, 1.0);
+        start_color * a + end_color * (1.0 - a)
+    }
 }
 
 fn main() {
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 256u32;
-    let image_height = ((image_width as f64 / aspect_ratio as f64) as u32).max(1);
+    let aspect_ratio: f64 = 16.0 / 10.0;
+    let image_width: u32 = 1000;
+    let image_height: u32 = ((image_width as f64 / aspect_ratio as f64) as u32).max(1);
 
     // camera
-    let focal_length = 1.0;
-    let viewport_height = 2.0;
-    let viewport_width =  viewport_height * (image_width as f64 / image_height as f64);
-    let camera_center = point3::new(0.0, 0.0, 0.0);
+    let focal_length: f64 = 1.0;
+    let viewport_height: f64 = 2.0;
+    let viewport_width: f64 =  viewport_height * (image_width as f64 / image_height as f64);
+    let camera_center: vec3 = point3::new(0.0, 0.0, 0.0);
 
     // Calculate the vectors across the horizontal and down the vertical viewport edges.
     let viewport_u = vec3::new(viewport_width, 0.0, 0.0);
@@ -47,12 +73,10 @@ fn main() {
 
     let mut image_data: Vec<u8> = Vec::new();
 
-    let count = image_height;
-    let mut pb = ProgressBar::new(count as u64);
+    let mut pb = ProgressBar::new(image_height as u64);
     pb.show_speed = false;
-    pb.show_time_left = true;
     pb.show_message = true;
-    pb.message("Rendering Line ");
+    pb.message("Scanline ");
     pb.format("[=> ]");
 
 
@@ -68,6 +92,7 @@ fn main() {
         pb.inc();
     }
     pb.finish_print("Rendering Complete.");
+    println!();
 
     create_image("image.png", image_width, image_height, &image_data);
 }
