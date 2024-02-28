@@ -95,7 +95,7 @@ impl vec3 {
 // for printing
 impl std::fmt::Display for vec3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "[{}, {}, {},]", self.x, self.y, self.z)
+        write!(f, "[{:.2}, {:.2}, {:.2}]", self.x, self.y, self.z)
     }
 }
 

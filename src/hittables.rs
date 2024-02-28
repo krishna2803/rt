@@ -20,7 +20,7 @@ impl hit_record {
             front_face: false,
         }
     }
-    pub fn set_face_normal(mut self, r: &ray, outward_normal: vec3) {
+    pub fn set_face_normal(&mut self, r: &ray, outward_normal: vec3) {
         self.front_face = vec3::dot(r.direction(), outward_normal) < 0.0;
         self.normal = if self.front_face {
             outward_normal
@@ -32,7 +32,7 @@ impl hit_record {
 
 #[allow(non_camel_case_types)]
 pub trait hittable {
-    fn hit(self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool;
+    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool;
 }
 
 #[allow(non_camel_case_types)]
@@ -42,7 +42,7 @@ pub enum hittable_obj {
 }
 
 impl hittable for hittable_obj {
-    fn hit(self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
+    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
         match self {
             hittable_obj::sphere(x) => x.hit(r, ray_tmin, ray_tmax, rec),
         }
@@ -68,7 +68,7 @@ impl hittable_list {
 }
 
 impl hittable for hittable_list {
-    fn hit(self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
+    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
         let mut temp_rec = hit_record::null();
         let mut hit_anything = false;
         let mut closest_so_far = ray_tmax;

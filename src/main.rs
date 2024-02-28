@@ -19,7 +19,7 @@ fn write_color(c: &color, data: &mut Vec<u8>) {
 
 fn ray_color(r: &ray, world: &hittable_list) -> color {
     let mut rec = hit_record::null();
-    if world.clone().hit(r, 0.0, f64::INFINITY, &mut rec) {
+    if world.hit(r, 0.0, f64::INFINITY, &mut rec) {
         (rec.normal + color::from_scalar(1.0)) * 0.5
     } else {
         let unit_direction = r.direction().normalized();
