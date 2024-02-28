@@ -32,7 +32,7 @@ impl hit_record {
 
 #[allow(non_camel_case_types)]
 pub trait hittable {
-    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool;
+    fn hit(&self, r: &ray, ray_t: &interval, rec: &mut hit_record) -> bool;
 }
 
 #[allow(non_camel_case_types)]
@@ -42,9 +42,9 @@ pub enum hittable_obj {
 }
 
 impl hittable for hittable_obj {
-    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
+    fn hit(&self, r: &ray, ray_t: &interval, rec: &mut hit_record) -> bool {
         match self {
-            hittable_obj::sphere(x) => x.hit(r, ray_tmin, ray_tmax, rec),
+            hittable_obj::sphere(x) => x.hit(r, ray_t, rec),
         }
     }
 }
@@ -68,16 +68,19 @@ impl hittable_list {
 }
 
 impl hittable for hittable_list {
-    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
+    fn hit(&self, r: &ray, ray_t: &interval, rec: &mut hit_record) -> bool {
         let mut temp_rec = hit_record::null();
         let mut hit_anything = false;
-        let mut closest_so_far = ray_tmax;
-        
+        let mut closest_so_far = ray_t.max();
+
         for object in self.objects.iter() {
-            if object.hit(r, ray_tmin, closest_so_far, &mut temp_rec) {
+            if object.hit(
+                r,
+                &interval::new(ray_t.min(), closest_so_far),
+                &mut temp_rec,
+            ) {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
-        
 
                 rec.p = temp_rec.p;
                 rec.t = temp_rec.t;

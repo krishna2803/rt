@@ -1,5 +1,35 @@
 use std::ops::{self};
 
+#[allow(non_camel_case_types)]
+pub struct interval {
+    min: f64,
+    max: f64,
+}
+
+impl interval {
+    pub fn new(min: f64, max: f64) -> interval {
+        interval { min, max }
+    }
+    pub fn empty() -> interval {
+        interval {
+            min: f64::INFINITY,
+            max: -f64::INFINITY,
+        }
+    }
+    pub fn min(&self) -> f64 {
+        self.min
+    }
+    pub fn max(&self) -> f64 {
+        self.max
+    }
+    pub fn contains(&self, x: f64) -> bool {
+        self.min <= x && x <= self.max
+    }
+    pub fn surrounds(&self, x: f64) -> bool {
+        self.min < x && x < self.max
+    }
+}
+
 #[derive(Clone, Copy)]
 #[allow(non_camel_case_types)]
 pub struct vec3 {
@@ -33,31 +63,31 @@ impl vec3 {
 
     // instance based functions
 
-    pub fn x(self) -> f64 {
+    pub fn x(&self) -> f64 {
         self.x
     }
 
-    pub fn y(self) -> f64 {
+    pub fn y(&self) -> f64 {
         self.y
     }
 
-    pub fn z(self) -> f64 {
+    pub fn z(&self) -> f64 {
         self.z
     }
 
-    pub fn length_squared(self) -> f64 {
+    pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn length(self) -> f64 {
+    pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    pub fn normalized(self) -> vec3 {
+    pub fn normalized(&self) -> vec3 {
         let len2 = self.length_squared();
         // if length is close enough to 1
         if f64::abs(len2 - 1.0) <= f64::EPSILON {
-            self
+            *self
         } else {
             let len = len2.sqrt();
             vec3 {
@@ -68,17 +98,17 @@ impl vec3 {
         }
     }
 
-    pub fn normalize(mut self) {
+    pub fn normalize(&mut self) {
         let len2 = self.length_squared();
         if f64::abs(len2 - 1.0) >= f64::EPSILON {
             let len = len2.sqrt();
             self.x /= len;
-            self.y /=len;
-            self.z /=len;
+            self.y /= len;
+            self.z /= len;
         }
     }
 
-    pub fn dot(u: vec3, v:vec3) -> f64 {
+    pub fn dot(u: vec3, v: vec3) -> f64 {
         u.x * v.x + u.y * v.y + u.z * v.z
     }
 
@@ -90,7 +120,6 @@ impl vec3 {
         }
     }
 }
-
 
 // for printing
 impl std::fmt::Display for vec3 {
@@ -217,31 +246,27 @@ impl ops::Neg for vec3 {
     }
 }
 
-
 #[derive(Clone, Copy)]
 #[allow(non_camel_case_types)]
 pub struct ray {
     origin: point3,
-    direction: vec3
+    direction: vec3,
 }
 
 impl ray {
     pub fn new(origin: vec3, direction: vec3) -> ray {
-        ray {
-            origin,
-            direction
-        }
+        ray { origin, direction }
     }
 
-    pub fn at(self, t: f64) -> point3 {
+    pub fn at(&self, t: f64) -> point3 {
         self.origin + self.direction * t
     }
 
-    pub fn direction(self) -> vec3 {
+    pub fn direction(&self) -> vec3 {
         self.direction
     }
 
-    pub fn origin(self) -> point3 {
+    pub fn origin(&self) -> point3 {
         self.origin
     }
 }

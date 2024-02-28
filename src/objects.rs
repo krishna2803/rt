@@ -15,7 +15,7 @@ impl sphere {
 }
 
 impl hittable for sphere {
-    fn hit(&self, r: &ray, ray_tmin: f64, ray_tmax: f64, rec: &mut hit_record) -> bool {
+    fn hit(&self, r: &ray, ray_t: &interval, rec: &mut hit_record) -> bool {
         let oc = r.origin() - self.center;
         let a = r.direction().length_squared();
         let half_b = vec3::dot(oc, r.direction());
@@ -27,9 +27,9 @@ impl hittable for sphere {
         }
         let sqrtd = discriminant.sqrt();
         let mut root = (-half_b - sqrtd) / a;
-        if root <= ray_tmin || root >= ray_tmax {
+        if root <= ray_t.min() || root >= ray_t.max() {
             root += 2.0 * sqrtd / a;
-            if root <= ray_tmin || root >= ray_tmax {
+            if root <= ray_t.min() || root >= ray_t.max() {
                 return false;
             }
         }
