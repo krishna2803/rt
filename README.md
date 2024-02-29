@@ -1,2 +1,2 @@
 # rt
-Rust Raytracing Library
+Rust Raytracing implementation
