@@ -1,6 +1,7 @@
+#![allow(non_camel_case_types)]
+
 use std::ops::{self};
 
-#[allow(non_camel_case_types)]
 pub struct interval {
     min: f64,
     max: f64,
@@ -14,6 +15,15 @@ impl interval {
         interval {
             min: f64::INFINITY,
             max: -f64::INFINITY,
+        }
+    }
+    pub fn clamp(&self, x: f64) -> f64 {
+        if x < self.min {
+            self.min
+        } else if x > self.max {
+            self.max
+        } else {
+            x
         }
     }
     pub fn min(&self) -> f64 {
@@ -31,16 +41,13 @@ impl interval {
 }
 
 #[derive(Clone, Copy)]
-#[allow(non_camel_case_types)]
 pub struct vec3 {
     x: f64,
     y: f64,
     z: f64,
 }
 
-#[allow(non_camel_case_types)]
 pub type point3 = vec3;
-#[allow(non_camel_case_types)]
 pub type color = vec3;
 
 impl vec3 {
@@ -59,6 +66,50 @@ impl vec3 {
 
     pub fn identity() -> vec3 {
         vec3::from_scalar(1.0)
+    }
+
+    #[inline]
+    pub fn random() -> vec3 {
+        vec3 {
+            x: fastrand::f64(),
+            y: fastrand::f64(),
+            z: fastrand::f64(),
+        }
+    }
+
+    #[inline]
+    pub fn random_between(min: f64, max: f64) -> vec3 {
+        let t = max - min;
+        vec3 {
+            x: min + t * fastrand::f64(),
+            y: min + t * fastrand::f64(),
+            z: min + t * fastrand::f64(),
+        }
+    }
+
+    #[inline]
+    pub fn random_in_unit_sphere() -> vec3 {
+        loop {
+            let p = vec3::random_between(-1.0, 1.0);
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
+    #[inline]
+    pub fn random_unit_vector() -> vec3 {
+        vec3::random_in_unit_sphere().normalized()
+    }
+
+    #[inline]
+    pub fn random_on_hemisphere(normal: &vec3) -> vec3 {
+        let on_unit_sphere = vec3::random_unit_vector();
+        if vec3::dot(&on_unit_sphere, normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
     }
 
     // instance based functions
@@ -108,16 +159,27 @@ impl vec3 {
         }
     }
 
-    pub fn dot(u: vec3, v: vec3) -> f64 {
+    #[inline]
+    pub fn dot(u: &vec3, v: &vec3) -> f64 {
         u.x * v.x + u.y * v.y + u.z * v.z
     }
 
-    pub fn cross(u: vec3, v: vec3) -> vec3 {
+    #[inline]
+    pub fn cross(u: &vec3, v: &vec3) -> vec3 {
         vec3 {
             x: u.y * v.z - u.z * v.y,
             y: u.z * v.x - u.x * v.z,
             z: u.x * v.y - u.y * v.z,
         }
+    }
+
+    pub fn reflect(v: &vec3, n: &vec3) -> vec3 {
+        *v - *n * 2.0 * vec3::dot(v, n)
+    }
+
+    pub fn near_zero(&self) -> bool {
+        let epsilon = 1e-8;
+        (self.x.abs() < epsilon) && (self.y.abs() < epsilon) && (self.z.abs() < epsilon)
     }
 }
 
@@ -247,10 +309,9 @@ impl ops::Neg for vec3 {
 }
 
 #[derive(Clone, Copy)]
-#[allow(non_camel_case_types)]
 pub struct ray {
-    origin: point3,
-    direction: vec3,
+    pub origin: point3,
+    pub direction: vec3,
 }
 
 impl ray {
@@ -268,5 +329,12 @@ impl ray {
 
     pub fn origin(&self) -> point3 {
         self.origin
+    }
+    
+    pub fn null() -> ray {
+        ray {
+            origin: point3::zero(),
+            direction: vec3::zero(),
+        }
     }
 }

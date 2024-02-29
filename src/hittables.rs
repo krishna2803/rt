@@ -1,14 +1,16 @@
-#[allow(non_camel_case_types)]
+#![allow(non_camel_case_types)]
+
+use crate::materials::*;
 use crate::maths::*;
 use crate::objects::*;
 
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct hit_record {
     pub p: point3,
     pub normal: vec3,
     pub t: f64,
     front_face: bool,
+    pub mat: material,
 }
 
 impl hit_record {
@@ -18,10 +20,11 @@ impl hit_record {
             normal: vec3::from_scalar(0.0),
             t: 0.0,
             front_face: false,
+            mat: material::lambertian(lambertian::empty()),
         }
     }
     pub fn set_face_normal(&mut self, r: &ray, outward_normal: vec3) {
-        self.front_face = vec3::dot(r.direction(), outward_normal) < 0.0;
+        self.front_face = vec3::dot(&r.direction(), &outward_normal) < 0.0;
         self.normal = if self.front_face {
             outward_normal
         } else {
@@ -30,13 +33,11 @@ impl hit_record {
     }
 }
 
-#[allow(non_camel_case_types)]
 pub trait hittable {
     fn hit(&self, r: &ray, ray_t: &interval, rec: &mut hit_record) -> bool;
 }
 
-#[allow(non_camel_case_types)]
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub enum hittable_obj {
     sphere(sphere),
 }
@@ -50,7 +51,6 @@ impl hittable for hittable_obj {
 }
 
 #[derive(Clone)]
-#[allow(non_camel_case_types)]
 pub struct hittable_list {
     objects: Vec<hittable_obj>,
 }
@@ -85,6 +85,7 @@ impl hittable for hittable_list {
                 rec.p = temp_rec.p;
                 rec.t = temp_rec.t;
                 rec.set_face_normal(r, temp_rec.normal);
+                rec.mat = temp_rec.mat.clone();
             }
         }
 
